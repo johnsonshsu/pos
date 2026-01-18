@@ -440,51 +440,152 @@ function generateCheckoutQR() {
 
         const total = document.getElementById('total-price').textContent;
         const qrContainer = document.getElementById('qrcode');
-        qrContainer.innerHTML = ''; // Clear previous
+        const qrModalEl = document.getElementById('qrModal');
+        const tableNumContainer = document.getElementById('qrTableNumberContainer');
+        const btnGenerate = document.getElementById('btnGenerateQR');
+        const qrDiningOptions = document.querySelectorAll('input[name="qrDiningOption"]');
+        const qrTableButtonsContainer = document.getElementById('qrTableButtons');
+        const selectedTableInput = document.getElementById('qrSelectedTable');
+        
+        const qrDiningOptionContainer = document.getElementById('qrDiningOptionContainer');
+        const qrGenerateBtnContainer = document.getElementById('qrGenerateBtnContainer');
+        
+        // 1. Sync Main Page Option to Modal Option
+        const mainDiningOption = document.querySelector('input[name="diningOption"]:checked').value;
+        if (mainDiningOption === 'dineIn') {
+            document.getElementById('qrDineIn').checked = true;
+        } else {
+            document.getElementById('qrTakeOut').checked = true;
+        }
+        
+        // Clear previous state and re-enable inputs/visibility
+        qrContainer.innerHTML = '';
+        selectedTableInput.value = '';
+        qrDiningOptions.forEach(el => el.disabled = false);
+        btnGenerate.disabled = false;
+        
+        // Reset Visibility
+        qrDiningOptionContainer.style.display = '';
+        qrGenerateBtnContainer.style.display = '';
+        
+        document.getElementById('qr-total').textContent = '';
+        document.getElementById('qr-info').textContent = ''; // 清空資訊
 
-        const orderData = [];
-        for (const [, cartItem] of Object.entries(cart)) {
-            if (cartItem.qty > 0) {
-                const item = { id: cartItem.itemId, q: cartItem.qty };
-                if (cartItem.note) {
-                    item.n = cartItem.note; // 加入備註
-                }
-                orderData.push(item);
-            }
+        // Render Table Buttons
+        qrTableButtonsContainer.innerHTML = '';
+        if (typeof tableNumbers !== 'undefined') {
+            tableNumbers.forEach(num => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-outline-secondary table-btn'; // Custom class for styling if needed
+                btn.textContent = num;
+                btn.style.width = '45px'; // Fixed width for grid look
+                btn.onclick = () => {
+                    // Update Value
+                    selectedTableInput.value = num;
+                    // Update Visuals
+                    document.querySelectorAll('#qrTableButtons .btn').forEach(b => {
+                        b.classList.remove('btn-primary', 'text-white');
+                        b.classList.add('btn-outline-secondary');
+                    });
+                    btn.classList.remove('btn-outline-secondary');
+                    btn.classList.add('btn-primary', 'text-white');
+                };
+                qrTableButtonsContainer.appendChild(btn);
+            });
         }
 
-        // 取得內用/外帶選項
-        const diningOption = document.querySelector('input[name="diningOption"]:checked').value;
+        // Enable buttons logic (if re-opening after lock)
+        // Note: Re-rendering clears event listeners and state, so buttons are fresh and enabled.
 
-        // Generate JSON string for QR
-        const payload = {
-            t: Date.now(),
-            type: diningOption,
-            d: orderData
+        // UI Update Logic (Toggle Table Number)
+        const updateUI = () => {
+            const isDineIn = document.getElementById('qrDineIn').checked;
+            tableNumContainer.style.display = isDineIn ? 'block' : 'none';
         };
 
-        // Show modal first to ensure container is ready (though QRCode usually works hidden)
-        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('qrModal'));
-        modal.show();
+        // Initialize UI
+        updateUI();
 
-        // Generate QR Code
-        // setTimeout to ensure modal is rendering if that was the issue
-        setTimeout(() => {
+        // Bind UI changes
+        qrDiningOptions.forEach(el => {
+            el.onchange = updateUI;
+        });
+
+        // 2. Define Generate Logic (Triggered by Button)
+        const generate = () => {
             try {
+                // Get CURRENT selection from MODAL
+                const selectedOptionEl = document.querySelector('input[name="qrDiningOption"]:checked');
+                if (!selectedOptionEl) {
+                    throw new Error('未選擇用餐方式');
+                }
+                const selectedOption = selectedOptionEl.value;
+                const isDineIn = selectedOption === 'dineIn';
+                
+                // Validation for Dine In
+                let tableNum = null;
+                if (isDineIn) {
+                    tableNum = selectedTableInput.value;
+                    if (!tableNum) {
+                        alert('內用請選擇桌號');
+                        return; // Stop generation
+                    }
+                }
+
+                const orderData = [];
+                for (const [, cartItem] of Object.entries(cart)) {
+                    if (cartItem.qty > 0) {
+                        const item = { id: cartItem.itemId, q: cartItem.qty };
+                        if (cartItem.note) {
+                            item.n = cartItem.note; // 加入備註
+                        }
+                        orderData.push(item);
+                    }
+                }
+                
+                const payload = {
+                    t: Date.now(),
+                    type: selectedOption, // Use modal selection
+                    tableNumber: tableNum, // Include table number
+                    d: orderData
+                };
+
                 qrContainer.innerHTML = ''; 
+                
+                // Check if QRCode lib is ready
+                if (typeof QRCode === 'undefined') {
+                    throw new Error('QRCode library missing');
+                }
+
                 new QRCode(qrContainer, {
                     text: JSON.stringify(payload),
                     width: 200,
-                    height: 200,
-                    correctLevel: QRCode.CorrectLevel.L
+                    height: 200
                 });
+                
+                // 顯示訂單資訊
+                const infoText = isDineIn ? `內用 - 桌號: ${tableNum}` : '外帶';
+                document.getElementById('qr-info').textContent = infoText;
+                document.getElementById('qr-total').textContent = `總計: ${total}`;
+
+                // 產生完畢後隱藏選項與按鈕，讓畫面更乾淨
+                qrDiningOptionContainer.style.display = 'none';
+                tableNumContainer.style.display = 'none';
+                qrGenerateBtnContainer.style.display = 'none';
+
             } catch (qrError) {
                 console.error('QR Gen Error', qrError);
-                qrContainer.innerHTML = '<p class="text-danger">QR Code 產生失敗</p>';
+                qrContainer.innerHTML = `<p class="text-danger">QR Code 產生失敗: ${qrError.message}</p>`;
             }
-        }, 100);
+        };
 
-        document.getElementById('qr-total').textContent = `總計: ${total}`;
+        // Bind Generate Button
+        btnGenerate.onclick = generate;
+
+        // Show modal
+        const modal = bootstrap.Modal.getOrCreateInstance(qrModalEl);
+        modal.show();
 
     } catch (e) {
         console.error(e);
@@ -508,6 +609,13 @@ function orderOnline() {
         return;
     }
 
+    // Set default time to current time + 15 minutes
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 15);
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('reservationTime').value = `${hours}:${minutes}`;
+
     // Show input modal
     const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('onlineReservationModal'));
     modal.show();
@@ -516,9 +624,14 @@ function orderOnline() {
 function confirmReservation() {
     const name = document.getElementById('reservationName').value.trim();
     const phone = document.getElementById('reservationPhone').value.trim();
+    const time = document.getElementById('reservationTime').value;
 
     if (!name) {
         alert('請輸入姓名');
+        return;
+    }
+    if (!time) {
+        alert('請選擇預計取餐時間');
         return;
     }
     if (!phone || phone.length !== 3) {
@@ -534,6 +647,7 @@ function confirmReservation() {
     document.getElementById('successOrderNumber').textContent = '#' + orderNum;
     document.getElementById('successName').textContent = name;
     document.getElementById('successPhone').textContent = phone;
+    document.getElementById('successTime').textContent = time;
     document.getElementById('successTotal').textContent = document.getElementById('total-price').textContent;
 
     const list = document.getElementById('successOrderList');
@@ -570,6 +684,7 @@ function confirmReservation() {
     // Clear inputs
     document.getElementById('reservationName').value = '';
     document.getElementById('reservationPhone').value = '';
+    document.getElementById('reservationTime').value = '';
     
     // 清空購物車
     clearCart();

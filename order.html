@@ -86,13 +86,41 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">現場結帳 QR Code</h5>
+                    <h5 class="modal-title">現場結帳</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center">
-                    <p class="mb-3">請至櫃台出示此 QR Code 結帳</p>
+                    <h4 class="mb-3 text-danger">請至櫃台出示此 QR Code 結帳</h4>
+                    
+                    <!-- QR Modal Dining Option -->
+                    <div id="qrDiningOptionContainer" class="btn-group w-50 mb-3" role="group">
+                        <input type="radio" class="btn-check" name="qrDiningOption" id="qrDineIn" value="dineIn">
+                        <label class="btn btn-outline-success" for="qrDineIn">內用</label>
+                        <input type="radio" class="btn-check" name="qrDiningOption" id="qrTakeOut" value="takeOut">
+                        <label class="btn btn-outline-success" for="qrTakeOut">外帶</label>
+                    </div>
+
+                    <!-- QR Modal Table Number (Visible only for Dine In) -->
+                    <div id="qrTableNumberContainer" class="mb-3 w-100" style="display: none;">
+                        <h6 class="fw-bold mb-2 text-center text-muted">請選擇桌號</h6>
+                        <div id="qrTableButtons" class="d-flex flex-wrap justify-content-center gap-2">
+                            <!-- Table buttons will be injected by JS -->
+                        </div>
+                        <input type="hidden" id="qrSelectedTable" value="">
+                    </div>
+
+                    <!-- Generate Button -->
+                    <div id="qrGenerateBtnContainer" class="mb-3">
+                        <button id="btnGenerateQR" class="btn btn-success">
+                            <i class="fas fa-qrcode me-1"></i> 產生 QR Code
+                        </button>
+                    </div>
+
                     <div id="qrcode" class="d-flex justify-content-center my-3"></div>
-                    <h4 id="qr-total" class="text-danger fw-bold mt-2"></h4>
+                    <div class="d-flex justify-content-center align-items-center gap-3 mt-3 fw-bold fs-4 text-dark">
+                        <span id="qr-info"></span>
+                        <span id="qr-total"></span>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
@@ -158,6 +186,10 @@
                         <input type="text" class="form-control" id="reservationName" placeholder="請輸入您的姓名">
                     </div>
                     <div class="mb-3">
+                        <label for="reservationTime" class="form-label fw-bold">預計取餐時間</label>
+                        <input type="time" class="form-control" id="reservationTime">
+                    </div>
+                    <div class="mb-3">
                         <label for="reservationPhone" class="form-label fw-bold">電話號碼 (後3碼)</label>
                         <input type="tel" class="form-control" id="reservationPhone" maxlength="3" placeholder="例如: 123" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     </div>
@@ -188,7 +220,8 @@
                     <div class="card mb-3">
                         <div class="card-body bg-light">
                             <p class="mb-1"><strong>姓名:</strong> <span id="successName"></span></p>
-                            <p class="mb-0"><strong>電話後3碼:</strong> <span id="successPhone"></span></p>
+                            <p class="mb-1"><strong>電話後3碼:</strong> <span id="successPhone"></span></p>
+                            <p class="mb-0"><strong>取餐時間:</strong> <span id="successTime"></span></p>
                         </div>
                     </div>
                     <div class="mb-3">

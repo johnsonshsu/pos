@@ -53,5 +53,8 @@ const commonNotes = [
     '切邊'
 ];
 
+// 桌號列表
+const tableNumbers = ['1', '2', '3', '5', '6', '7', '8', '10', '11', '12'];
+
 // Shared Utils
 const formatCurrency = (num) => `$${num}`;
