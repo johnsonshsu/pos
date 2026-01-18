@@ -462,6 +462,7 @@ function generateCheckoutQR() {
         // Reset Visibility
         qrDiningOptionContainer.style.display = '';
         qrGenerateBtnContainer.style.display = '';
+        document.getElementById('qr-instruction').style.display = 'none';
         
         document.getElementById('qr-total').textContent = '';
         document.getElementById('qr-info').textContent = ''; // 清空資訊
@@ -563,6 +564,7 @@ function generateCheckoutQR() {
                 const infoText = isDineIn ? `內用 - 桌號: ${tableNum}` : '外帶';
                 document.getElementById('qr-info').textContent = infoText;
                 document.getElementById('qr-total').textContent = `總計: ${total}`;
+                document.getElementById('qr-instruction').style.display = 'block';
 
                 // 產生完畢後隱藏選項與按鈕，讓畫面更乾淨
                 qrDiningOptionContainer.style.display = 'none';
