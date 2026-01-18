@@ -450,13 +450,8 @@ function generateCheckoutQR() {
         const qrDiningOptionContainer = document.getElementById('qrDiningOptionContainer');
         const qrGenerateBtnContainer = document.getElementById('qrGenerateBtnContainer');
         
-        // 1. Sync Main Page Option to Modal Option
-        const mainDiningOption = document.querySelector('input[name="diningOption"]:checked').value;
-        if (mainDiningOption === 'dineIn') {
-            document.getElementById('qrDineIn').checked = true;
-        } else {
-            document.getElementById('qrTakeOut').checked = true;
-        }
+        // 1. Default to Dine In
+        document.getElementById('qrDineIn').checked = true;
         
         // Clear previous state and re-enable inputs/visibility
         qrContainer.innerHTML = '';
