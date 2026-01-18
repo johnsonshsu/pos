@@ -18,13 +18,74 @@
                 <a href="order.html" class="btn btn-warning btn-lg py-4 px-5 fw-bold text-decoration-none" style="font-size: 1.5rem;">
                     <i class="fas fa-mobile-alt me-2"></i> 客戶自助點餐
                 </a>
-                <a href="pos.html" class="btn btn-primary btn-lg py-4 px-5 fw-bold text-decoration-none" style="font-size: 1.5rem;">
+                <a href="#" class="btn btn-primary btn-lg py-4 px-5 fw-bold text-decoration-none" style="font-size: 1.5rem;" onclick="showLoginModal(event)">
                     <i class="fas fa-desktop me-2"></i> POS 後台系統
                 </a>
             </div>
         </div>
     </div>
 
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-dark">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-key me-2"></i>
+                        系統登入
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">使用者名稱</label>
+                        <input type="text" class="form-control" id="username" placeholder="請輸入使用者名稱">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">密碼</label>
+                        <input type="password" class="form-control" id="password" placeholder="請輸入密碼">
+                    </div>
+                    <div id="login-error" class="text-danger mb-3 d-none">帳號或密碼錯誤</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="handleLogin()">登入</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showLoginModal(event) {
+            event.preventDefault();
+            const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+            modal.show();
+        }
+
+        function handleLogin() {
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const errorDiv = document.getElementById('login-error');
+            
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            if (username === 'admin' && password === '00000') {
+                window.location.href = 'pos.html';
+            } else {
+                errorDiv.classList.remove('d-none');
+                passwordInput.value = '';
+                usernameInput.focus();
+            }
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('password').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+    </script>
 </body>
 </html>
