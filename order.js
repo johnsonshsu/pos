@@ -274,7 +274,9 @@ function saveNote() {
     if (!currentNoteItemId) return;
 
     const customNote = document.getElementById('custom-note').value.trim();
-    let allNotes = [...selectedNotes];
+    // Sort selected notes to ensure consistent key generation regardless of selection order
+    let allNotes = [...selectedNotes].sort();
+    
     if (customNote) {
         allNotes.push(customNote);
     }
@@ -337,7 +339,8 @@ function updateBottomBar() {
         const item = menuItems.find(i => i.id === cartItem.itemId);
         if (item) {
             total += item.price * cartItem.qty;
-            count += cartItem.qty;
+            // 修正統計邏輯：計算品項數(筆數)，而非總數量
+            count += 1;
         }
     }
 

@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 監聽自訂備註輸入，即時更新顯示
     document.getElementById('pos-custom-note').addEventListener('input', posUpdateSelectedNotesDisplay);
+
+    // Initial check for table number visibility
+    toggleTableNumberInput();
 });
 
 function updateClock() {
@@ -67,6 +70,14 @@ function renderProducts(catId) {
         `;
         container.appendChild(col);
     });
+}
+
+function toggleTableNumberInput() {
+    const isDineIn = document.getElementById('posDineIn').checked;
+    const container = document.getElementById('tableNumberContainer');
+    if (container) {
+        container.style.display = isDineIn ? 'block' : 'none';
+    }
 }
 
 // ---------------- Order Logic ----------------
@@ -201,7 +212,9 @@ function posSaveNote() {
     if (!posCurrentNoteItemId) return;
 
     const customNote = document.getElementById('pos-custom-note').value.trim();
-    let allNotes = [...posSelectedNotes];
+    // Sort selected notes to ensure consistent key generation regardless of selection order
+    let allNotes = [...posSelectedNotes].sort();
+    
     if (customNote) {
         allNotes.push(customNote);
     }
@@ -262,6 +275,15 @@ function submitOrder() {
 
     // 取得內用/外帶選項
     const diningOption = document.querySelector('input[name="posDiningOption"]:checked').value;
+    let tableNumber = null;
+
+    if (diningOption === 'dineIn') {
+        tableNumber = document.getElementById('posTableNumber').value.trim();
+        if (!tableNumber) {
+            alert('請輸入桌號');
+            return;
+        }
+    }
 
     // Create Order Object
     const newOrder = {
@@ -270,6 +292,7 @@ function submitOrder() {
         items: { ...currentOrder },
         total: document.getElementById('pos-total-price').textContent,
         type: diningOption, // 'dineIn' or 'takeOut'
+        tableNumber: tableNumber,
         status: 'new' // new, making, done, history
     };
 
@@ -277,6 +300,7 @@ function submitOrder() {
     
     // Clear Current
     currentOrder = {};
+    document.getElementById('posTableNumber').value = ''; // Clear table number
     renderCurrentOrder();
     
     // Update Kanban
@@ -322,10 +346,14 @@ function renderKanban() {
             actionBtn = `<button class="btn btn-secondary btn-sm w-100 mt-2" onclick="updateStatus(${order.id}, 'history')">結帳歸檔</button>`;
         }
 
-        // 內用/外帶標籤
-        const typeLabel = order.type === 'takeOut'
-            ? '<span class="badge bg-info">外帶</span>'
-            : '<span class="badge bg-success">內用</span>';
+        // 內用/外帶標籤 (含桌號)
+        let typeLabel = '';
+        if (order.type === 'takeOut') {
+            typeLabel = '<span class="badge bg-info">外帶</span>';
+        } else {
+            const tableInfo = order.tableNumber ? ` 桌號:${order.tableNumber}` : '';
+            typeLabel = `<span class="badge bg-success">內用${tableInfo}</span>`;
+        }
 
         card.innerHTML = `
             <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
@@ -416,6 +444,11 @@ function onScanSuccess(decodedText, decodedResult) {
             if (payload.type) {
                 const radioId = payload.type === 'takeOut' ? 'posTakeOut' : 'posDineIn';
                 document.getElementById(radioId).checked = true;
+                // Trigger change event manually to update table number visibility
+                document.getElementById(radioId).dispatchEvent(new Event('change'));
+                
+                // Manually call toggle since dispatchEvent might not propagate if not listening directly (but we call it via onchange attribute)
+                toggleTableNumberInput();
             }
 
             // Add items to current order (含備註)
