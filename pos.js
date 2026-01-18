@@ -336,13 +336,14 @@ function submitOrder() {
     const typeText = diningOption === 'dineIn' ? '內用' : '外帶';
     document.getElementById('confirm-type').textContent = typeText;
     
-    // Show/Hide Table Number Row
-    const tableRow = document.getElementById('confirm-table-row');
+    // Show/Hide Table Number Wrapper
+    const tableWrapper = document.getElementById('confirm-table-wrapper');
     if (diningOption === 'dineIn') {
-        tableRow.style.display = 'flex';
+        tableWrapper.classList.remove('d-none');
         document.getElementById('confirm-table').textContent = tableNumber;
     } else {
-        tableRow.style.display = 'none';
+        tableWrapper.classList.add('d-none');
+        document.getElementById('confirm-table').textContent = '';
     }
 
     // Populate List

@@ -8,7 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
 </head>
-<body class="d-flex flex-column" style="height: 100vh; overflow: hidden;">
+<body class="d-flex flex-column">
 
     <!-- Top Bar -->
     <header class="pos-header d-flex justify-content-between align-items-center">
@@ -27,10 +27,10 @@
     </header>
 
     <!-- Main Content -->
-    <div class="container-fluid flex-grow-1 d-flex flex-column overflow-hidden p-0">
+    <div class="container-fluid flex-grow-1 d-flex flex-column p-0">
         
         <!-- Upper Section: Menu & Current Order -->
-        <div class="row m-0 flex-grow-1" style="height: 60%;">
+        <div class="row m-0 flex-grow-1 pos-upper-section">
             
             <!-- Left: Menu Area -->
             <div class="col-8 bg-light p-3 d-flex flex-column border-end">
@@ -98,7 +98,7 @@
         </div>
 
         <!-- Lower Section: Status Board (Kanban) -->
-        <div class="row m-0 flex-grow-0" style="height: 40%; background: #e9ecef; border-top: 2px solid #ccc;">
+        <div class="row m-0 flex-grow-0 pos-lower-section" style="background: #e9ecef; border-top: 2px solid #ccc;">
             
             <!-- New Orders -->
             <div class="col-3 p-0 border-end border-white">
@@ -195,13 +195,15 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-light border mb-3">
-                        <div class="d-flex justify-content-between mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
                             <span class="fw-bold">用餐方式:</span>
-                            <span id="confirm-type" class="badge bg-secondary fs-6"></span>
-                        </div>
-                        <div class="d-flex justify-content-between" id="confirm-table-row">
-                            <span class="fw-bold">桌號:</span>
-                            <span id="confirm-table" class="fs-5 fw-bold text-primary"></span>
+                            <div>
+                                <span id="confirm-type" class="badge bg-secondary fs-6"></span>
+                                <span id="confirm-table-wrapper" class="ms-2">
+                                    <span class="fw-bold">桌號:</span>
+                                    <span id="confirm-table" class="fs-5 fw-bold text-primary"></span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                     

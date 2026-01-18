@@ -459,3 +459,33 @@ body {
     color: #b45309;
     font-weight: 500;
 }
+
+/* POS Responsive Layout */
+@media (min-width: 992px) {
+    body {
+        height: 100vh;
+        overflow: hidden;
+    }
+    .pos-upper-section {
+        height: 60%;
+    }
+    .pos-lower-section {
+        height: 40%;
+    }
+    .container-fluid {
+        overflow: hidden;
+    }
+}
+@media (max-width: 991.98px) {
+    .pos-upper-section, .pos-lower-section {
+        height: auto;
+        min-height: 500px; /* Give some minimum height for scroll */
+    }
+    /* Ensure internal scrolling areas have height limits on mobile */
+    #pos-products {
+        max-height: 400px;
+    }
+    .order-list {
+        max-height: 300px;
+    }
+}
