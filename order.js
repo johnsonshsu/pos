@@ -472,7 +472,8 @@ function generateCheckoutQR() {
                 new QRCode(qrContainer, {
                     text: JSON.stringify(payload),
                     width: 200,
-                    height: 200
+                    height: 200,
+                    correctLevel: QRCode.CorrectLevel.L
                 });
             } catch (qrError) {
                 console.error('QR Gen Error', qrError);
