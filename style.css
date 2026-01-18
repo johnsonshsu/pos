@@ -44,13 +44,14 @@ body {
 .category-nav {
     display: flex !important;
     flex-wrap: nowrap !important;
-    overflow-x: scroll !important;
+    overflow-x: auto !important;
     overflow-y: hidden !important;
     -webkit-overflow-scrolling: touch;
     padding: 10px 15px;
     gap: 10px;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    white-space: nowrap;
 }
 
 .category-nav::-webkit-scrollbar {

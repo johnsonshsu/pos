@@ -5,31 +5,13 @@ let currentNoteItemId = null; // 目前正在編輯備註的商品 ID
 let selectedNotes = []; // 目前選取的常用備註
 
 // Init
+// Initialize page
 document.addEventListener('DOMContentLoaded', () => {
-    // 顯示系統資訊
-    if (typeof systemInfo !== 'undefined') {
-        document.getElementById('sys-name').textContent = systemInfo.name;
-        document.getElementById('sys-info').innerHTML = `v${systemInfo.version} &copy; ${systemInfo.developer}`;
-        document.title = `${systemInfo.name} - 自助點餐`;
-    }
-
+    document.getElementById('sys-name').textContent = systemInfo.name;
     renderCategoryNav();
     initCategoryNavDrag();
-    // 預設選取第一個分類
-    if (categories.length > 0) {
-        selectCategory(categories[0].id);
-    }
-
-    // 監聽自訂備註輸入，即時更新顯示
-    document.getElementById('custom-note').addEventListener('input', updateSelectedNotesDisplay);
-
-    // 監聽 QR Code Modal 關閉事件，清空購物車
-    const qrModal = document.getElementById('qrModal');
-    if (qrModal) {
-        qrModal.addEventListener('hidden.bs.modal', () => {
-            clearCart();
-        });
-    }
+    renderMenuItems(categories[0].id); // Default to first category
+    updateBottomBar();
 });
 
 /// <summary>
