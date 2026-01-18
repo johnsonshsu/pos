@@ -15,7 +15,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 監聽自訂備註輸入，即時更新顯示
     document.getElementById('custom-note').addEventListener('input', updateSelectedNotesDisplay);
+
+    // 監聽 QR Code Modal 關閉事件，清空購物車
+    const qrModal = document.getElementById('qrModal');
+    if (qrModal) {
+        qrModal.addEventListener('hidden.bs.modal', () => {
+            clearCart();
+        });
+    }
 });
+
+/// <summary>
+/// 清空購物車
+/// </summary>
+function clearCart() {
+    cart = {};
+    updateBottomBar();
+    renderCartList();
+}
 
 /// <summary>
 /// 初始化分類導航列的滑鼠拖曳滾動功能
@@ -398,45 +415,158 @@ function showCartDetails() {
 
 // Generate QR Code
 function generateCheckoutQR() {
-    const total = document.getElementById('total-price').textContent;
-    const qrContainer = document.getElementById('qrcode');
-    qrContainer.innerHTML = ''; // Clear previous
-
-    const orderData = [];
-    for (const [, cartItem] of Object.entries(cart)) {
-        if (cartItem.qty > 0) {
-            const item = { id: cartItem.itemId, q: cartItem.qty };
-            if (cartItem.note) {
-                item.n = cartItem.note; // 加入備註
+    try {
+        // Check cart first
+        let hasItems = false;
+        for (const key in cart) {
+            if (cart[key].qty > 0) {
+                hasItems = true;
+                break;
             }
-            orderData.push(item);
+        }
+
+        if (!hasItems) {
+            alert('請先點餐');
+            return;
+        }
+
+        if (typeof QRCode === 'undefined') {
+            alert('QRCode library not loaded');
+            return;
+        }
+
+        const total = document.getElementById('total-price').textContent;
+        const qrContainer = document.getElementById('qrcode');
+        qrContainer.innerHTML = ''; // Clear previous
+
+        const orderData = [];
+        for (const [, cartItem] of Object.entries(cart)) {
+            if (cartItem.qty > 0) {
+                const item = { id: cartItem.itemId, q: cartItem.qty };
+                if (cartItem.note) {
+                    item.n = cartItem.note; // 加入備註
+                }
+                orderData.push(item);
+            }
+        }
+
+        // 取得內用/外帶選項
+        const diningOption = document.querySelector('input[name="diningOption"]:checked').value;
+
+        // Generate JSON string for QR
+        const payload = {
+            t: Date.now(),
+            type: diningOption,
+            d: orderData
+        };
+
+        // Show modal first to ensure container is ready (though QRCode usually works hidden)
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('qrModal'));
+        modal.show();
+
+        // Generate QR Code
+        // setTimeout to ensure modal is rendering if that was the issue
+        setTimeout(() => {
+            try {
+                qrContainer.innerHTML = ''; 
+                new QRCode(qrContainer, {
+                    text: JSON.stringify(payload),
+                    width: 200,
+                    height: 200
+                });
+            } catch (qrError) {
+                console.error('QR Gen Error', qrError);
+                qrContainer.innerHTML = '<p class="text-danger">QR Code 產生失敗</p>';
+            }
+        }, 100);
+
+        document.getElementById('qr-total').textContent = `總計: ${total}`;
+
+    } catch (e) {
+        console.error(e);
+        alert('結帳功能發生錯誤');
+    }
+}
+
+// Online Reservation
+function orderOnline() {
+    // Check if cart is empty
+    let hasItems = false;
+    for (const key in cart) {
+        if (cart[key].qty > 0) {
+            hasItems = true;
+            break;
         }
     }
 
-    if (orderData.length === 0) {
+    if (!hasItems) {
         alert('請先點餐');
         return;
     }
 
-    // 取得內用/外帶選項
-    const diningOption = document.querySelector('input[name="diningOption"]:checked').value;
-
-    // Generate JSON string for QR
-    // Structure: { t: timestamp, type: 'dineIn'|'takeOut', d: [ {id, q, n?}, ... ] }
-    const payload = {
-        t: Date.now(),
-        type: diningOption,
-        d: orderData
-    };
-
-    new QRCode(qrContainer, {
-        text: JSON.stringify(payload),
-        width: 200,
-        height: 200
-    });
-
-    document.getElementById('qr-total').textContent = `總計: ${total}`;
-
-    const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+    // Show input modal
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('onlineReservationModal'));
     modal.show();
+}
+
+function confirmReservation() {
+    const name = document.getElementById('reservationName').value.trim();
+    const phone = document.getElementById('reservationPhone').value.trim();
+
+    if (!name) {
+        alert('請輸入姓名');
+        return;
+    }
+    if (!phone || phone.length !== 3) {
+        alert('請輸入電話號碼後3碼');
+        return;
+    }
+
+    // Generate Order Number
+    const timestamp = Date.now().toString();
+    const orderNum = 'ORD' + timestamp.slice(-6);
+
+    // Populate Success Modal
+    document.getElementById('successOrderNumber').textContent = '#' + orderNum;
+    document.getElementById('successName').textContent = name;
+    document.getElementById('successPhone').textContent = phone;
+    document.getElementById('successTotal').textContent = document.getElementById('total-price').textContent;
+
+    const list = document.getElementById('successOrderList');
+    list.innerHTML = '';
+
+    for (const [cartKey, cartItem] of Object.entries(cart)) {
+        if (cartItem.qty > 0) {
+            const item = menuItems.find(i => i.id === cartItem.itemId);
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            
+            const noteHtml = cartItem.note ? `<div class="text-muted small">${cartItem.note}</div>` : '';
+            
+            li.innerHTML = `
+                <div>
+                    <div>${item.name} x ${cartItem.qty}</div>
+                    ${noteHtml}
+                </div>
+                <span>$${item.price * cartItem.qty}</span>
+            `;
+            list.appendChild(li);
+        }
+    }
+
+    // Hide input modal
+    const inputModalEl = document.getElementById('onlineReservationModal');
+    const inputModal = bootstrap.Modal.getInstance(inputModalEl);
+    inputModal.hide();
+
+    // Show success modal
+    const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('reservationSuccessModal'));
+    successModal.show();
+    
+    // Clear inputs
+    document.getElementById('reservationName').value = '';
+    document.getElementById('reservationPhone').value = '';
+    
+    // 清空購物車
+    clearCart();
 }

@@ -144,6 +144,73 @@
         </div>
     </div>
 
+    <!-- Online Reservation Input Modal -->
+    <div class="modal fade" id="onlineReservationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-utensils me-2"></i>線上預定</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="reservationName" class="form-label fw-bold">姓名</label>
+                        <input type="text" class="form-control" id="reservationName" placeholder="請輸入您的姓名">
+                    </div>
+                    <div class="mb-3">
+                        <label for="reservationPhone" class="form-label fw-bold">電話號碼 (後3碼)</label>
+                        <input type="tel" class="form-control" id="reservationPhone" maxlength="3" placeholder="例如: 123" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmReservation()">
+                        確認預定
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reservation Success Modal -->
+    <div class="modal fade" id="reservationSuccessModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-success">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>預定成功</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <h6 class="text-muted">訂單編號</h6>
+                        <h2 class="fw-bold text-success" id="successOrderNumber">#000000</h2>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="card-body bg-light">
+                            <p class="mb-1"><strong>姓名:</strong> <span id="successName"></span></p>
+                            <p class="mb-0"><strong>電話後3碼:</strong> <span id="successPhone"></span></p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="fw-bold border-bottom pb-2">訂餐內容</h6>
+                        <ul class="list-group list-group-flush" id="successOrderList">
+                            <!-- Order items will be cloned here -->
+                        </ul>
+                    </div>
+                    <div class="text-end fw-bold fs-5 text-danger border-top pt-2" id="successTotal">
+                        總計: $0
+                    </div>
+                    <div class="alert alert-warning mt-3 small mb-0">
+                        <i class="fas fa-camera me-1"></i> 請截圖或保存此畫面作為取餐憑證
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success w-100" data-bs-dismiss="modal">我已截圖保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="data.js"></script>
