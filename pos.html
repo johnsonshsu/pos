@@ -13,8 +13,11 @@
     <!-- Top Bar -->
     <header class="pos-header d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-3">
-            <h4 class="m-0 fw-bold">POS 系統</h4>
-            <div id="clock" class="pos-clock">00:00:00</div>
+            <h4 class="m-0 fw-bold"><span id="pos-sys-name"></span> POS 系統</h4>
+            <div class="pos-clock d-flex gap-2">
+                <span id="pos-date">2026/01/18 (日)</span>
+                <span id="clock">00:00:00</span>
+            </div>
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-warning btn-sm fw-bold"><i class="fas fa-chart-bar me-1"></i>結算/管理</button>
@@ -67,10 +70,13 @@
                     </div>
                     <!-- Table Number Input (Visible only for Dine In) -->
                     <div id="tableNumberContainer" class="mt-2">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-warning text-dark fw-bold">桌號</span>
-                            <input type="number" id="posTableNumber" class="form-control" placeholder="請輸入桌號" min="1">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-muted small">請選擇桌號: <span id="posSelectedTableDisplay" class="text-primary"></span></span>
                         </div>
+                        <div id="posTableButtons" class="d-flex flex-wrap gap-1" style="max-height: 100px; overflow-y: auto;">
+                            <!-- Table buttons will be injected by JS -->
+                        </div>
+                        <input type="hidden" id="posTableNumber">
                     </div>
                 </div>
 
@@ -85,7 +91,7 @@
                         <h4 class="fw-bold m-0" id="pos-total-price">總計: $0</h4>
                     </div>
                     <button class="btn btn-success w-100 py-2 fw-bold fs-5" onclick="submitOrder()">
-                        送出訂單 & 播報
+                        <i class="fas fa-paper-plane me-1"></i>送出訂單 & 播報
                     </button>
                 </div>
             </div>
@@ -96,25 +102,25 @@
             
             <!-- New Orders -->
             <div class="col-3 p-0 border-end border-white">
-                <div class="status-header status-new">新訂單 <span id="count-new">0</span></div>
+                <div class="status-header status-new"><i class="fas fa-plus-circle me-1"></i>新訂單 <span id="count-new">0</span></div>
                 <div class="status-column p-2" id="col-new"></div>
             </div>
 
             <!-- Making -->
             <div class="col-3 p-0 border-end border-white">
-                <div class="status-header status-making">製作中 <span id="count-making">0</span></div>
+                <div class="status-header status-making"><i class="fas fa-fire me-1"></i>製作中 <span id="count-making">0</span></div>
                 <div class="status-column p-2" id="col-making"></div>
             </div>
 
             <!-- Done -->
             <div class="col-3 p-0 border-end border-white">
-                <div class="status-header status-done">已完成 <span id="count-done">0</span></div>
+                <div class="status-header status-done"><i class="fas fa-check-double me-1"></i>已完成 <span id="count-done">0</span></div>
                 <div class="status-column p-2" id="col-done"></div>
             </div>
 
             <!-- History/Today -->
             <div class="col-3 p-0">
-                <div class="status-header status-history">本日已結帳 <span id="count-history">0</span></div>
+                <div class="status-header status-history"><i class="fas fa-history me-1"></i>本日已結帳 <span id="count-history">0</span></div>
                 <div class="status-column p-2" id="col-history"></div>
             </div>
         </div>
@@ -173,6 +179,48 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                     <button type="button" class="btn btn-warning" onclick="posSaveNote()">
                         <i class="fas fa-check me-1"></i>確認
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Confirmation Modal -->
+    <div class="modal fade" id="orderConfirmationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-clipboard-check me-2"></i>確認訂單資訊</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-light border mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-bold">用餐方式:</span>
+                            <span id="confirm-type" class="badge bg-secondary fs-6"></span>
+                        </div>
+                        <div class="d-flex justify-content-between" id="confirm-table-row">
+                            <span class="fw-bold">桌號:</span>
+                            <span id="confirm-table" class="fs-5 fw-bold text-primary"></span>
+                        </div>
+                    </div>
+                    
+                    <h6 class="fw-bold border-bottom pb-2 mb-2">餐點內容</h6>
+                    <div class="overflow-auto" style="max-height: 300px;">
+                        <ul class="list-group list-group-flush" id="confirm-order-list">
+                            <!-- Items will be injected here -->
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <h5 class="m-0 fw-bold">總計金額</h5>
+                        <h4 class="m-0 fw-bold text-danger" id="confirm-total"></h4>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>取消</button>
+                    <button type="button" class="btn btn-success fw-bold" onclick="finalizeOrder()">
+                        <i class="fas fa-check me-1"></i>確認送出
                     </button>
                 </div>
             </div>

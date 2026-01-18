@@ -12,8 +12,8 @@
 
     <!-- Header -->
     <div class="customer-header d-flex justify-content-between align-items-center shadow-sm">
-        <h4 class="m-0"><i class="fas fa-utensils me-2"></i>自助點餐</h4>
-        <a href="index.html" class="btn btn-outline-light btn-sm">回首頁</a>
+        <h4 class="m-0"><i class="fas fa-utensils me-2"></i><span id="sys-name"></span> 自助點餐</h4>
+        <a href="index.html" class="btn btn-outline-light btn-sm"><i class="fas fa-home me-1"></i>回首頁</a>
     </div>
 
     <!-- 分類導航列 -->
@@ -27,6 +27,7 @@
     <div id="menu-container" style="padding-bottom: 80px;">
         <!-- Items will be injected here by JS -->
     </div>
+    <div id="sys-info" class="text-center text-muted small pb-5 mb-5"></div>
 
     <!-- Bottom Bar -->
     <div class="bottom-bar">
@@ -36,13 +37,13 @@
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-secondary rounded-pill" onclick="showCartDetails()">
-                點餐明細
+                <i class="fas fa-list-ul me-1"></i>點餐明細
             </button>
             <button class="btn btn-success rounded-pill" onclick="generateCheckoutQR()">
-                現場結帳
+                <i class="fas fa-qrcode me-1"></i>現場結帳
             </button>
             <button class="btn btn-primary rounded-pill" onclick="orderOnline()">
-                線上預定
+                <i class="fas fa-mobile-alt me-1"></i>線上預定
             </button>
         </div>
     </div>
@@ -61,7 +62,7 @@
                     </ul>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>關閉</button>
                 </div>
             </div>
         </div>
@@ -81,18 +82,20 @@
                     <!-- QR Modal Dining Option -->
                     <div id="qrDiningOptionContainer" class="btn-group w-50 mb-3" role="group">
                         <input type="radio" class="btn-check" name="qrDiningOption" id="qrDineIn" value="dineIn">
-                        <label class="btn btn-outline-success" for="qrDineIn">內用</label>
+                        <label class="btn btn-outline-success" for="qrDineIn"><i class="fas fa-chair me-1"></i>內用</label>
                         <input type="radio" class="btn-check" name="qrDiningOption" id="qrTakeOut" value="takeOut">
-                        <label class="btn btn-outline-success" for="qrTakeOut">外帶</label>
+                        <label class="btn btn-outline-success" for="qrTakeOut"><i class="fas fa-shopping-bag me-1"></i>外帶</label>
                     </div>
 
                     <!-- QR Modal Table Number (Visible only for Dine In) -->
                     <div id="qrTableNumberContainer" class="mb-3 w-100" style="display: none;">
-                        <h6 class="fw-bold mb-2 text-center text-muted">請選擇桌號</h6>
+                        <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+                            <h6 class="fw-bold mb-0 text-muted">桌號</h6>
+                            <input type="number" id="qrSelectedTable" class="form-control text-center" value="1" min="1" style="width: 80px;">
+                        </div>
                         <div id="qrTableButtons" class="d-flex flex-wrap justify-content-center gap-2">
                             <!-- Table buttons will be injected by JS -->
                         </div>
-                        <input type="hidden" id="qrSelectedTable" value="">
                     </div>
 
                     <!-- Generate Button -->
@@ -109,7 +112,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>關閉</button>
                 </div>
             </div>
         </div>
@@ -149,7 +152,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>取消</button>
                     <button type="button" class="btn btn-primary" onclick="saveNote()">
                         <i class="fas fa-check me-1"></i>確認
                     </button>
@@ -181,9 +184,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>取消</button>
                     <button type="button" class="btn btn-primary" onclick="confirmReservation()">
-                        確認預定
+                        <i class="fas fa-check me-1"></i>確認預定
                     </button>
                 </div>
             </div>

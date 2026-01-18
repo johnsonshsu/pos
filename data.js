@@ -1,4 +1,11 @@
-// Categories
+// 系統資訊
+const systemInfo = {
+    name: '幸福早餐點餐系統',
+    version: 'v1.0 專業版',
+    developer: 'Johnson Hsu'
+};
+
+// 商品分類列表
 const categories = [
     { id: 'sandwich', name: '三明治系列' },
     { id: 'burger', name: '漢堡系列' },
@@ -7,7 +14,7 @@ const categories = [
     { id: 'drink', name: '飲料' }
 ];
 
-// Menu Items
+// 商品列表
 const menuItems = [
     { id: 'A01', name: '煎蛋三明治', price: 25, cat: 'sandwich' },
     { id: 'A02', name: '起司蛋三明治', price: 35, cat: 'sandwich' },

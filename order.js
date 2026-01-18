@@ -6,6 +6,13 @@ let selectedNotes = []; // 目前選取的常用備註
 
 // Init
 document.addEventListener('DOMContentLoaded', () => {
+    // 顯示系統資訊
+    if (typeof systemInfo !== 'undefined') {
+        document.getElementById('sys-name').textContent = systemInfo.name;
+        document.getElementById('sys-info').innerHTML = `v${systemInfo.version} &copy; ${systemInfo.developer}`;
+        document.title = `${systemInfo.name} - 自助點餐`;
+    }
+
     renderCategoryNav();
     initCategoryNavDrag();
     // 預設選取第一個分類
@@ -159,15 +166,13 @@ function renderMenuItems(catId) {
     items.forEach(item => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'menu-item';
+        itemDiv.onclick = () => addToCart(item.id);
         itemDiv.innerHTML = `
             <img src="images/product/${item.id}.png" class="product-icon" alt="${item.name}">
             <div class="info">
                 <h5>${item.name}</h5>
                 <div class="price">$${item.price}</div>
             </div>
-            <button class="add-btn" onclick="addToCart('${item.id}')">
-                <i class="fas fa-plus"></i>
-            </button>
         `;
         container.appendChild(itemDiv);
     });
@@ -416,6 +421,21 @@ function showCartDetails() {
     modal.show();
 }
 
+/// <summary>
+/// 同步桌號按鈕狀態
+/// </summary>
+function syncTableButtons(currentNum) {
+    document.querySelectorAll('#qrTableButtons .btn').forEach(btn => {
+        if (parseInt(btn.textContent) === parseInt(currentNum)) {
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-primary', 'text-white');
+        } else {
+            btn.classList.remove('btn-primary', 'text-white');
+            btn.classList.add('btn-outline-secondary');
+        }
+    });
+}
+
 // Generate QR Code
 function generateCheckoutQR() {
     try {
@@ -455,7 +475,7 @@ function generateCheckoutQR() {
         
         // Clear previous state and re-enable inputs/visibility
         qrContainer.innerHTML = '';
-        selectedTableInput.value = '';
+        selectedTableInput.value = '1'; // Default to 1
         qrDiningOptions.forEach(el => el.disabled = false);
         btnGenerate.disabled = false;
         
@@ -477,19 +497,18 @@ function generateCheckoutQR() {
                 btn.textContent = num;
                 btn.style.width = '45px'; // Fixed width for grid look
                 btn.onclick = () => {
-                    // Update Value
                     selectedTableInput.value = num;
-                    // Update Visuals
-                    document.querySelectorAll('#qrTableButtons .btn').forEach(b => {
-                        b.classList.remove('btn-primary', 'text-white');
-                        b.classList.add('btn-outline-secondary');
-                    });
-                    btn.classList.remove('btn-outline-secondary');
-                    btn.classList.add('btn-primary', 'text-white');
+                    syncTableButtons(num);
                 };
                 qrTableButtonsContainer.appendChild(btn);
             });
         }
+        
+        // Sync initial state
+        syncTableButtons(1);
+
+        // Bind input change
+        selectedTableInput.oninput = () => syncTableButtons(selectedTableInput.value);
 
         // Enable buttons logic (if re-opening after lock)
         // Note: Re-rendering clears event listeners and state, so buttons are fresh and enabled.

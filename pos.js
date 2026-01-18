@@ -8,6 +8,12 @@ let posSelectedNotes = []; // 目前選取的常用備註
 
 // Init
 document.addEventListener('DOMContentLoaded', () => {
+    // 顯示系統資訊
+    if (typeof systemInfo !== 'undefined') {
+        document.getElementById('pos-sys-name').textContent = systemInfo.name;
+        document.title = `${systemInfo.name} - POS 系統`;
+    }
+
     updateClock();
     setInterval(updateClock, 1000);
     renderCategories();
@@ -22,10 +28,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial check for table number visibility
     toggleTableNumberInput();
+    renderPosTableButtons();
 });
+
+function renderPosTableButtons() {
+    const container = document.getElementById('posTableButtons');
+    if (!container || typeof tableNumbers === 'undefined') return;
+    
+    container.innerHTML = '';
+    tableNumbers.forEach(num => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-outline-secondary btn-sm';
+        btn.textContent = num;
+        btn.style.width = '40px';
+        btn.onclick = () => selectPosTable(num, btn);
+        container.appendChild(btn);
+    });
+}
+
+function selectPosTable(num, btn) {
+    document.getElementById('posTableNumber').value = num;
+    document.getElementById('posSelectedTableDisplay').textContent = num;
+    
+    // Update visuals
+    const container = document.getElementById('posTableButtons');
+    container.querySelectorAll('.btn').forEach(b => {
+        b.classList.remove('btn-primary', 'text-white');
+        b.classList.add('btn-outline-secondary');
+    });
+    btn.classList.remove('btn-outline-secondary');
+    btn.classList.add('btn-primary', 'text-white');
+}
 
 function updateClock() {
     const now = new Date();
+    // 更新日期與星期
+    const dateStr = now.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+    const dayStr = `(${dayNames[now.getDay()]})`;
+    document.getElementById('pos-date').textContent = `${dateStr} ${dayStr}`;
+    
+    // 更新時間
     document.getElementById('clock').textContent = now.toLocaleTimeString('zh-TW', { hour12: false });
 }
 
@@ -271,19 +315,68 @@ function renderCurrentOrder() {
 }
 
 function submitOrder() {
-    if (Object.keys(currentOrder).length === 0) return;
+    if (Object.keys(currentOrder).length === 0) {
+        alert('請先點餐');
+        return;
+    }
 
     // 取得內用/外帶選項
     const diningOption = document.querySelector('input[name="posDiningOption"]:checked').value;
     let tableNumber = null;
 
     if (diningOption === 'dineIn') {
-        tableNumber = document.getElementById('posTableNumber').value.trim();
+        tableNumber = document.getElementById('posTableNumber').value;
         if (!tableNumber) {
-            alert('請輸入桌號');
+            alert('請選擇桌號');
             return;
         }
     }
+
+    // Populate Confirmation Modal
+    const typeText = diningOption === 'dineIn' ? '內用' : '外帶';
+    document.getElementById('confirm-type').textContent = typeText;
+    
+    // Show/Hide Table Number Row
+    const tableRow = document.getElementById('confirm-table-row');
+    if (diningOption === 'dineIn') {
+        tableRow.style.display = 'flex';
+        document.getElementById('confirm-table').textContent = tableNumber;
+    } else {
+        tableRow.style.display = 'none';
+    }
+
+    // Populate List
+    const list = document.getElementById('confirm-order-list');
+    list.innerHTML = '';
+    for (const [cartKey, cartItem] of Object.entries(currentOrder)) {
+        const item = menuItems.find(i => i.id === cartItem.itemId);
+        if (item) {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center px-0';
+            
+            const noteHtml = cartItem.note ? `<div class="text-muted small">${cartItem.note}</div>` : '';
+            
+            li.innerHTML = `
+                <div>
+                    <div class="fw-bold">${item.name} x ${cartItem.qty}</div>
+                    ${noteHtml}
+                </div>
+                <span>$${item.price * cartItem.qty}</span>
+            `;
+            list.appendChild(li);
+        }
+    }
+
+    document.getElementById('confirm-total').textContent = document.getElementById('pos-total-price').textContent;
+
+    // Show Modal
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('orderConfirmationModal'));
+    modal.show();
+}
+
+function finalizeOrder() {
+    const diningOption = document.querySelector('input[name="posDiningOption"]:checked').value;
+    const tableNumber = document.getElementById('posTableNumber').value;
 
     // Create Order Object
     const newOrder = {
@@ -292,15 +385,26 @@ function submitOrder() {
         items: { ...currentOrder },
         total: document.getElementById('pos-total-price').textContent,
         type: diningOption, // 'dineIn' or 'takeOut'
-        tableNumber: tableNumber,
+        tableNumber: diningOption === 'dineIn' ? tableNumber : null,
         status: 'new' // new, making, done, history
     };
 
     orders.push(newOrder);
     
+    // Hide Modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('orderConfirmationModal'));
+    modal.hide();
+
     // Clear Current
     currentOrder = {};
-    document.getElementById('posTableNumber').value = ''; // Clear table number
+    document.getElementById('posTableNumber').value = ''; 
+    document.getElementById('posSelectedTableDisplay').textContent = '';
+    // Reset table buttons
+    document.querySelectorAll('#posTableButtons .btn').forEach(b => {
+        b.classList.remove('btn-primary', 'text-white');
+        b.classList.add('btn-outline-secondary');
+    });
+    
     renderCurrentOrder();
     
     // Update Kanban
@@ -338,12 +442,19 @@ function renderKanban() {
 
         // Action Buttons based on status
         let actionBtn = '';
+        let mainBtn = '';
+        let cancelBtn = `<button class="btn btn-danger btn-sm flex-fill" onclick="cancelOrder(${order.id})"><i class="fas fa-trash-alt me-1"></i>作廢</button>`;
+        
         if(order.status === 'new') {
-            actionBtn = `<button class="btn btn-primary btn-sm w-100 mt-2" onclick="updateStatus(${order.id}, 'making')">開始製作</button>`;
+            mainBtn = `<button class="btn btn-primary btn-sm flex-fill" onclick="updateStatus(${order.id}, 'making')"><i class="fas fa-play me-1"></i>開始製作</button>`;
         } else if (order.status === 'making') {
-            actionBtn = `<button class="btn btn-success btn-sm w-100 mt-2" onclick="updateStatus(${order.id}, 'done')">完成</button>`;
+            mainBtn = `<button class="btn btn-success btn-sm flex-fill" onclick="updateStatus(${order.id}, 'done')"><i class="fas fa-check me-1"></i>完成</button>`;
         } else if (order.status === 'done') {
-            actionBtn = `<button class="btn btn-secondary btn-sm w-100 mt-2" onclick="updateStatus(${order.id}, 'history')">結帳歸檔</button>`;
+            mainBtn = `<button class="btn btn-secondary btn-sm flex-fill" onclick="updateStatus(${order.id}, 'history')"><i class="fas fa-archive me-1"></i>結帳歸檔</button>`;
+        }
+
+        if (mainBtn) {
+            actionBtn = `<div class="d-flex gap-1 mt-2">${mainBtn}${cancelBtn}</div>`;
         }
 
         // 內用/外帶標籤 (含桌號)
@@ -354,13 +465,23 @@ function renderKanban() {
             const tableInfo = order.tableNumber ? ` 桌號:${order.tableNumber}` : '';
             typeLabel = `<span class="badge bg-success">內用${tableInfo}</span>`;
         }
+        
+        // 處理已作廢樣式
+        let cardClass = 'kanban-card';
+        let statusBadge = '';
+        if (order.cancelled) {
+            cardClass += ' bg-light text-muted border-danger';
+            statusBadge = '<span class="badge bg-danger ms-1">已作廢</span>';
+            actionBtn = ''; // 已作廢不顯示按鈕
+        }
 
+        card.className = cardClass;
         card.innerHTML = `
             <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                <strong>#${order.id} ${typeLabel}</strong>
+                <strong>#${order.id} ${typeLabel}${statusBadge}</strong>
                 <small>${order.time}</small>
             </div>
-            <div class="text-dark small">${itemStr}</div>
+            <div class="small ${order.cancelled ? 'text-decoration-line-through' : 'text-dark'}">${itemStr}</div>
             <div class="text-end fw-bold mt-1 text-danger">${order.total}</div>
             ${actionBtn}
         `;
@@ -383,6 +504,16 @@ function updateStatus(orderId, newStatus) {
     const order = orders.find(o => o.id === orderId);
     if(order) {
         order.status = newStatus;
+        renderKanban();
+    }
+}
+
+function cancelOrder(orderId) {
+    if(!confirm('確定要作廢此訂單嗎？')) return;
+    const order = orders.find(o => o.id === orderId);
+    if(order) {
+        order.status = 'history';
+        order.cancelled = true;
         renderKanban();
     }
 }
