@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS 系統</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body class="d-flex flex-column" style="height: 100vh; overflow: hidden;">
+
+    <!-- Top Bar -->
+    <header class="pos-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <h4 class="m-0 fw-bold">POS 系統</h4>
+            <div id="clock" class="pos-clock">00:00:00</div>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-warning btn-sm fw-bold"><i class="fas fa-chart-bar me-1"></i>結算/管理</button>
+            <button class="btn btn-outline-secondary btn-sm text-white border-secondary"><i class="fas fa-key me-1"></i>改密碼</button>
+            <a href="index.html" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt me-1"></i>登出</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container-fluid flex-grow-1 d-flex flex-column overflow-hidden p-0">
+        
+        <!-- Upper Section: Menu & Current Order -->
+        <div class="row m-0 flex-grow-1" style="height: 60%;">
+            
+            <!-- Left: Menu Area -->
+            <div class="col-8 bg-light p-3 d-flex flex-column border-end">
+                <!-- Categories -->
+                <div class="mb-3 d-flex flex-wrap" id="pos-categories">
+                    <!-- Injected by JS -->
+                </div>
+                
+                <!-- Product Grid -->
+                <div class="overflow-auto flex-grow-1 pt-1">
+                    <div class="row g-2 pb-2" id="pos-products">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Current Order -->
+            <div class="col-4 p-0 d-flex flex-column bg-white">
+                <div class="bg-dark text-white p-2 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">點餐內容</span>
+                    <button class="btn btn-primary btn-sm" onclick="startScanner()">
+                        <i class="fas fa-camera me-1"></i>掃描訂單
+                    </button>
+                </div>
+
+                <!-- 內用/外帶選擇 -->
+                <div class="dining-option-bar p-2 bg-light border-bottom">
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="posDiningOption" id="posDineIn" value="dineIn" checked>
+                        <label class="btn btn-outline-warning" for="posDineIn">
+                            <i class="fas fa-chair me-1"></i>內用
+                        </label>
+                        <input type="radio" class="btn-check" name="posDiningOption" id="posTakeOut" value="takeOut">
+                        <label class="btn btn-outline-warning" for="posTakeOut">
+                            <i class="fas fa-shopping-bag me-1"></i>外帶
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Order List -->
+                <div class="order-list p-2" id="current-order-list">
+                    <!-- Injected by JS -->
+                </div>
+
+                <!-- Footer -->
+                <div class="p-3 border-top bg-light">
+                    <div class="d-flex justify-content-end mb-2">
+                        <h4 class="fw-bold m-0" id="pos-total-price">總計: $0</h4>
+                    </div>
+                    <button class="btn btn-success w-100 py-2 fw-bold fs-5" onclick="submitOrder()">
+                        送出訂單 & 播報
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lower Section: Status Board (Kanban) -->
+        <div class="row m-0 flex-grow-0" style="height: 40%; background: #e9ecef; border-top: 2px solid #ccc;">
+            
+            <!-- New Orders -->
+            <div class="col-3 p-0 border-end border-white">
+                <div class="status-header status-new">新訂單 <span id="count-new">0</span></div>
+                <div class="status-column p-2" id="col-new"></div>
+            </div>
+
+            <!-- Making -->
+            <div class="col-3 p-0 border-end border-white">
+                <div class="status-header status-making">製作中 <span id="count-making">0</span></div>
+                <div class="status-column p-2" id="col-making"></div>
+            </div>
+
+            <!-- Done -->
+            <div class="col-3 p-0 border-end border-white">
+                <div class="status-header status-done">已完成 <span id="count-done">0</span></div>
+                <div class="status-column p-2" id="col-done"></div>
+            </div>
+
+            <!-- History/Today -->
+            <div class="col-3 p-0">
+                <div class="status-header status-history">本日已結帳 <span id="count-history">0</span></div>
+                <div class="status-column p-2" id="col-history"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scanner Modal -->
+    <div class="modal fade" id="scannerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">掃描客戶 QR Code</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="stopScanner()"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="reader"></div>
+                    <p class="text-muted small text-center mt-2">請將 QR Code 對準鏡頭</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div class="modal fade" id="posNoteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>商品備註</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <img id="pos-note-product-img" src="" class="pos-product-icon me-2" alt="">
+                            <div>
+                                <div id="pos-note-product-name" class="fw-bold"></div>
+                                <div id="pos-note-product-price" class="text-danger"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">常用備註</label>
+                        <div id="pos-common-notes-container" class="d-flex flex-wrap gap-2">
+                            <!-- Common notes will be injected here -->
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pos-custom-note" class="form-label fw-bold">自訂備註</label>
+                        <textarea id="pos-custom-note" class="form-control" rows="2" placeholder="輸入其他備註..."></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">已選備註</label>
+                        <div id="pos-selected-notes" class="selected-notes-display text-muted">尚未選擇備註</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-warning" onclick="posSaveNote()">
+                        <i class="fas fa-check me-1"></i>確認
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="data.js"></script>
+    <script src="pos.js"></script>
+</body>
+</html>

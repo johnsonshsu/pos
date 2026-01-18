@@ -1,0 +1,461 @@
+/* Global Overrides */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* SPA Transitions */
+.view-section {
+    width: 100%;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* --- Customer Order Page Styles --- */
+.customer-header {
+    background-color: #2d5a27;
+    color: white;
+    padding: 15px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* 內用/外帶選擇 */
+.dining-option-container {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+}
+
+/* 分類導航列 */
+.category-nav-container {
+    position: sticky;
+    top: 56px;
+    z-index: 999;
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.category-nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: scroll !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 15px;
+    gap: 10px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.category-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.category-tab {
+    flex: 0 0 auto !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 2px solid #2d5a27;
+    background-color: #fff;
+    color: #2d5a27;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* 分類圖示 */
+.category-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.category-tab:hover {
+    background-color: #e8f5e6;
+}
+
+.category-tab.active {
+    background-color: #2d5a27;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(45, 90, 39, 0.3);
+}
+
+.dining-option-container .btn-outline-primary {
+    border-color: #2d5a27;
+    color: #2d5a27;
+    font-weight: bold;
+}
+
+.dining-option-container .btn-check:checked + .btn-outline-primary {
+    background-color: #2d5a27;
+    border-color: #2d5a27;
+    color: white;
+}
+
+.dining-option-container .btn-outline-primary:hover {
+    background-color: #3d7a35;
+    border-color: #3d7a35;
+    color: white;
+}
+
+.category-header {
+    background-color: #eee;
+    color: #555;
+    padding: 10px 15px;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+}
+
+.menu-item {
+    background: white;
+    border-bottom: 1px solid #eee;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.menu-item:hover {
+    background-color: #f8fff8;
+    box-shadow: 0 4px 12px rgba(45, 90, 39, 0.15);
+    transform: translateY(-2px);
+}
+
+/* 商品圖示 */
+.product-icon {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.menu-item .info {
+    flex: 1;
+}
+
+.menu-item .info h5 {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.menu-item .info .price {
+    color: #d9534f;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* 購物車明細樣式 */
+.cart-item-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.cart-qty {
+    min-width: 40px;
+    text-align: center;
+    font-weight: bold;
+}
+
+#cart-list .list-group-item {
+    border-left: 3px solid #2d5a27;
+}
+
+#cart-list .btn-group .btn {
+    padding: 4px 10px;
+}
+
+.add-btn {
+    background-color: #2d5a27;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.add-btn:active {
+    background-color: #1e3d1a;
+}
+
+.bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    border-top: 1px solid #ddd;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.total-price {
+    color: #d9534f;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* --- POS System Styles --- */
+
+/* POS 內用/外帶選擇 */
+.dining-option-bar {
+    background-color: #2c2c2c;
+}
+
+.dining-option-bar .btn-outline-warning {
+    border-color: #6c757d;
+    color: #adb5bd;
+    background-color: #3a3a3a;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.dining-option-bar .btn-outline-warning:hover {
+    border-color: #f0ad4e;
+    color: #f0ad4e;
+    background-color: #444;
+}
+
+.dining-option-bar .btn-check:checked + .btn-outline-warning {
+    background-color: #f0ad4e;
+    border-color: #f0ad4e;
+    color: #1a1a1a;
+    box-shadow: 0 0 8px rgba(240, 173, 78, 0.5);
+}
+
+.pos-header {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+}
+
+.pos-clock {
+    color: #0f0;
+    font-family: monospace;
+    font-size: 1.1rem;
+    border: 1px solid #555;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #000;
+}
+
+.pos-category-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 20px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    color: #555;
+    background: #f5f5f5;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.pos-category-btn .category-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.pos-category-btn:hover {
+    border-color: #e09540;
+    color: #e09540;
+    background: #fff8ef;
+}
+
+.pos-category-btn.active {
+    background-color: #e09540;
+    border-color: #e09540;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.product-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 100%;
+    border: 1px solid #ddd;
+}
+
+.product-card:hover {
+    background-color: #fff8ef;
+    box-shadow: 0 4px 12px rgba(224, 149, 64, 0.25);
+    transform: translateY(-2px);
+    border-color: #e09540;
+}
+
+.product-card:active {
+    transform: scale(0.95);
+    border-color: #f0ad4e;
+}
+
+/* POS 商品圖示 */
+.pos-product-icon {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+    border-radius: 6px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.product-code {
+    color: #999;
+    font-size: 0.8rem;
+}
+
+.product-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-price {
+    color: #d9534f;
+    font-weight: bold;
+}
+
+.order-panel {
+    background-color: white;
+    height: calc(100vh - 180px); /* Adjust based on header/footer */
+    display: flex;
+    flex-direction: column;
+}
+
+.order-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    background: #fff;
+}
+
+.order-item {
+    border-bottom: 1px dotted #ccc;
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.qty-btn {
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    font-size: 12px;
+    border-radius: 50%;
+}
+
+.status-column {
+    height: 300px;
+    border: 1px solid #ddd;
+    background-color: #fdfdfd;
+    overflow-y: auto;
+}
+
+.status-header {
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.status-new { background-color: #ff4500; }
+.status-making { background-color: #007bff; }
+.status-done { background-color: #5cb85c; }
+.status-history { background-color: #777; }
+
+.kanban-card {
+    background: white;
+    border: 1px solid #ccc;
+    margin: 5px;
+    padding: 5px;
+    font-size: 0.9rem;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+/* QR Scanner Modal */
+#reader {
+    width: 100%;
+    min-height: 300px;
+    background: #000;
+}
+
+/* 備註相關樣式 */
+.note-btn {
+    transition: all 0.2s ease;
+}
+
+.note-btn.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+}
+
+.selected-notes-display {
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    min-height: 38px;
+}
+
+/* 購物車備註樣式 (order.html) */
+.cart-item-note {
+    font-size: 0.85rem;
+    color: #0d6efd;
+    margin-top: 2px;
+}
+
+/* POS 訂單備註樣式 */
+.pos-order-note {
+    font-size: 0.85rem;
+    color: #333;
+    margin-top: 2px;
+}
+
+/* Kanban 備註樣式 */
+.kanban-note {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+/* POS 已選備註文字樣式 */
+.pos-selected-notes-text {
+    color: #b45309;
+    font-weight: 500;
+}

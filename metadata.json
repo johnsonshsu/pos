@@ -1,0 +1,7 @@
+{
+  "name": "早餐POS及訂餐系統",
+  "description": "這是一個純 HTML/JS/Bootstrap 5 實現的早餐訂購系統，具有客戶端和 POS 介面，包括二維碼生成和掃描。",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
