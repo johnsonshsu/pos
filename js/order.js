@@ -4,6 +4,31 @@ let currentCategory = null; // 目前選取的分類
 let currentNoteItemId = null; // 目前正在編輯備註的商品 ID
 let selectedNotes = []; // 目前選取的常用備註
 
+/// <summary>
+/// 將備註文字編碼為壓縮格式（常用備註用索引，自訂備註用 c: 前綴）
+/// </summary>
+/// <param name="noteText">備註文字（以「、」分隔）</param>
+/// <returns>編碼後的字串</returns>
+function encodeNote(noteText) {
+    if (!noteText) return '';
+
+    const notes = noteText.split('、');
+    const encoded = [];
+
+    for (const note of notes) {
+        const index = commonNotes.indexOf(note);
+        if (index !== -1) {
+            // 常用備註：使用索引
+            encoded.push(index.toString());
+        } else {
+            // 自訂備註：加上 c: 前綴
+            encoded.push('c:' + note);
+        }
+    }
+
+    return encoded.join(',');
+}
+
 // Init
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {
@@ -535,7 +560,8 @@ function generateCheckoutQR() {
                     if (cartItem.qty > 0) {
                         const item = { id: cartItem.itemId, q: cartItem.qty };
                         if (cartItem.note) {
-                            item.n = cartItem.note; // 加入備註
+                            // 使用編碼後的備註以減少 QR Code 資料量
+                            item.n = encodeNote(cartItem.note);
                         }
                         orderData.push(item);
                     }

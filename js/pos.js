@@ -6,6 +6,33 @@ let html5QrcodeScanner = null;
 let posCurrentNoteItemId = null; // 目前正在編輯備註的商品 ID
 let posSelectedNotes = []; // 目前選取的常用備註
 
+/// <summary>
+/// 將編碼後的備註解碼為原始文字（索引轉回常用備註，c: 前綴為自訂備註）
+/// </summary>
+/// <param name="encodedNote">編碼後的備註字串</param>
+/// <returns>解碼後的備註文字（以「、」分隔）</returns>
+function decodeNote(encodedNote) {
+    if (!encodedNote) return '';
+
+    const parts = encodedNote.split(',');
+    const decoded = [];
+
+    for (const part of parts) {
+        if (part.startsWith('c:')) {
+            // 自訂備註：移除 c: 前綴
+            decoded.push(part.substring(2));
+        } else {
+            // 常用備註：使用索引查找
+            const index = parseInt(part, 10);
+            if (!isNaN(index) && index >= 0 && index < commonNotes.length) {
+                decoded.push(commonNotes[index]);
+            }
+        }
+    }
+
+    return decoded.join('、');
+}
+
 // Init
 document.addEventListener('DOMContentLoaded', () => {
     // 顯示系統資訊
@@ -583,9 +610,10 @@ function onScanSuccess(decodedText, decodedResult) {
                 toggleTableNumberInput();
             }
 
-            // Add items to current order (含備註)
+            // Add items to current order (含備註，需解碼)
             payload.d.forEach(item => {
-                addToOrderDirect(item.id, item.q, item.n || '');
+                const decodedNote = decodeNote(item.n || '');
+                addToOrderDirect(item.id, item.q, decodedNote);
             });
 
             // Close modal
