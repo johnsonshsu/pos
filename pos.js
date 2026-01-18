@@ -337,7 +337,12 @@ function renderKanban() {
             ${actionBtn}
         `;
 
-        document.getElementById(`col-${order.status}`).appendChild(card);
+        const colContainer = document.getElementById(`col-${order.status}`);
+        if (order.status === 'history') {
+            colContainer.prepend(card);
+        } else {
+            colContainer.appendChild(card);
+        }
     });
 
     // Update Counts
